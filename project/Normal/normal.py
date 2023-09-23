@@ -43,9 +43,8 @@ class NNET(nn.Module):
         # tensor [ret] size: [1, 4, 480, 640] , min: -0.9968838095664978 , max: 29.235084533691406 mean: 3.119987726211548
         ret = ret[:, 0:3, 0:H, 0:W] # remove pads and normal alpha
 
-        ret = (ret + 1.0)/2.0 # convert data from [-1.0, 1.0] to [0.0, 1.0]
+        return (ret + 1.0)/2.0 # convert data from [-1.0, 1.0] to [0.0, 1.0]
 
-        return ret
 
     def load_weights(self, model_path="models/Normal.pth"):
         cdir = os.path.dirname(__file__)

@@ -19,10 +19,10 @@ setup(
     version="1.0.0",
     author="Dell Du",
     author_email="18588220928@163.com",
-    description="Normal Model Package",
+    description="Surface Normal Model Package",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/delldu/MiDaS.git",
+    url="https://github.com/delldu/Normal.git",
     packages=["Normal"],
     package_data={
         "Normal": [
