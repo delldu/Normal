@@ -1,7 +1,11 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from typing import List
 import pdb
+
+# Some code is not beauty for it comes from TensorFlow framework !!!
+
 
 # Upsample + BatchNorm
 class UpSampleBN(nn.Module):
@@ -57,7 +61,6 @@ class Conv2d(nn.Conv2d):
                         self.padding, self.dilation, self.groups)
 
 
-# normalize
 def norm_normalize(norm_out):
     min_kappa = 0.01
     norm_x, norm_y, norm_z, kappa = torch.split(norm_out, 1, dim=1)
@@ -68,27 +71,19 @@ def norm_normalize(norm_out):
 
 
 class Decoder(nn.Module):
-    def __init__(self, args):
+    def __init__(self, arch):
         super(Decoder, self).__init__()
-        # args = Namespace(architecture='GN', 
-        #     pretrained='nyu', sampling_ratio=0.4, 
-        #     importance_ratio=0.7, input_height=480, 
-        #     input_width=640, imgs_dir='./examples')
-
-        # feature-map
         self.conv2 = nn.Conv2d(2048, 2048, kernel_size=1, stride=1, padding=0)
-        if args.architecture == 'BN':
+        if arch == 'BN':
             self.up1 = UpSampleBN(skip_input=2048 + 176, output_features=1024)
             self.up2 = UpSampleBN(skip_input=1024 + 64, output_features=512)
             self.up3 = UpSampleBN(skip_input=512 + 40, output_features=256)
             self.up4 = UpSampleBN(skip_input=256 + 24, output_features=128)
-
-        elif args.architecture == 'GN':
+        elif arch == 'GN':
             self.up1 = UpSampleGN(skip_input=2048 + 176, output_features=1024)
             self.up2 = UpSampleGN(skip_input=1024 + 64, output_features=512)
             self.up3 = UpSampleGN(skip_input=512 + 40, output_features=256)
             self.up4 = UpSampleGN(skip_input=256 + 24, output_features=128)
-
         else:
             raise Exception('invalid architecture')
 
@@ -119,13 +114,8 @@ class Decoder(nn.Module):
             nn.Conv1d(128, 4, kernel_size=1),
         )
 
-        # ==> pdb.set_trace()
-
-
-    def forward(self, features):
+    def forward(self, features: List[torch.Tensor]):
         x_block0, x_block1, x_block2, x_block3, x_block4 = features[4], features[5], features[6], features[8], features[11]
-
-        # generate feature-map
 
         x_d0 = self.conv2(x_block4)                     # x_d0 : [2, 2048, 15, 20]      1/32 res
         x_d1 = self.up1(x_d0, x_block3)                 # x_d1 : [2, 1024, 30, 40]      1/16 res
@@ -140,14 +130,11 @@ class Decoder(nn.Module):
         ################################################################################################################
         # out_res4
         ################################################################################################################
-
-        # grid_sample feature-map
-        feat_map = F.interpolate(x_d2, scale_factor=2, mode='bilinear', align_corners=True)
-        init_pred = F.interpolate(out_res8, scale_factor=2, mode='bilinear', align_corners=True)
+        feat_map = F.interpolate(x_d2, scale_factor=2.0, mode='bilinear', align_corners=True)
+        init_pred = F.interpolate(out_res8, scale_factor=2.0, mode='bilinear', align_corners=True)
         feat_map = torch.cat([feat_map, init_pred], dim=1)  # (B, 512+4, H, W)
         B, _, H, W = feat_map.shape
 
-        # try all pixels
         out_res4 = self.out_conv_res4(feat_map.view(B, 512 + 4, -1))  # (B, 4, N)
         out_res4 = norm_normalize(out_res4)  # (B, 4, N) - normalized
         out_res4 = out_res4.view(B, 4, H, W)
@@ -155,9 +142,8 @@ class Decoder(nn.Module):
         ################################################################################################################
         # out_res2
         ################################################################################################################
-        # grid_sample feature-map
-        feat_map = F.interpolate(x_d3, scale_factor=2, mode='bilinear', align_corners=True)
-        init_pred = F.interpolate(out_res4, scale_factor=2, mode='bilinear', align_corners=True)
+        feat_map = F.interpolate(x_d3, scale_factor=2.0, mode='bilinear', align_corners=True)
+        init_pred = F.interpolate(out_res4, scale_factor=2.0, mode='bilinear', align_corners=True)
         feat_map = torch.cat([feat_map, init_pred], dim=1)  # (B, 512+4, H, W)
         B, _, H, W = feat_map.shape
 
@@ -168,9 +154,8 @@ class Decoder(nn.Module):
         ################################################################################################################
         # out_res1
         ################################################################################################################
-        # grid_sample feature-map
-        feat_map = F.interpolate(x_d4, scale_factor=2, mode='bilinear', align_corners=True)
-        init_pred = F.interpolate(out_res2, scale_factor=2, mode='bilinear', align_corners=True)
+        feat_map = F.interpolate(x_d4, scale_factor=2.0, mode='bilinear', align_corners=True)
+        init_pred = F.interpolate(out_res2, scale_factor=2.0, mode='bilinear', align_corners=True)
         feat_map = torch.cat([feat_map, init_pred], dim=1)  # (B, 512+4, H, W)
         B, _, H, W = feat_map.shape
 
@@ -179,4 +164,3 @@ class Decoder(nn.Module):
         out_res1 = out_res1.view(B, 4, H, W)
 
         return out_res1
-

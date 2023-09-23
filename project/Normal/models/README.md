@@ -1,0 +1,2 @@
+3d88a8c414c35dcb2df3319d45034a97  nyu.pt
+9422fee8946c1c495f6d54fbbfa94299  scannet.pt

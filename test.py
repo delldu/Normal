@@ -23,8 +23,7 @@ def test(model, test_loader, device, results_dir):
     with torch.no_grad():
         for data_dict in tqdm(test_loader):
             img = data_dict['img'].to(device)
-            norm_out_list, _, _ = model(img)
-            norm_out = norm_out_list[-1]
+            norm_out = model(img)
 
             pred_norm = norm_out[:, :3, :, :]
             pred_kappa = norm_out[:, 3:, :, :]
