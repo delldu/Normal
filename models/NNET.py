@@ -4,13 +4,18 @@ import torch.nn.functional as F
 
 from models.submodules.encoder import Encoder
 from models.submodules.decoder import Decoder
-
+import pdb
 
 class NNET(nn.Module):
     def __init__(self, args):
         super(NNET, self).__init__()
         self.encoder = Encoder()
         self.decoder = Decoder(args)
+
+        # args = Namespace(architecture='GN', pretrained='nyu', 
+        #     sampling_ratio=0.4, importance_ratio=0.7, input_height=480, 
+        #     input_width=640, imgs_dir='./examples')
+
 
     def get_1x_lr_params(self):  # lr/10 learning rate
         return self.encoder.parameters()

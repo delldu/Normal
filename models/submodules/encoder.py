@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+from .gen_efficientnet import create_model
+import pdb
 
 class Encoder(nn.Module):
     def __init__(self):
@@ -9,9 +10,14 @@ class Encoder(nn.Module):
 
         basemodel_name = 'tf_efficientnet_b5_ap'
         print('Loading base model ()...'.format(basemodel_name), end='')
-        basemodel = torch.hub.load('rwightman/gen-efficientnet-pytorch', basemodel_name, pretrained=True)
+        # basemodel = torch.hub.load('rwightman/gen-efficientnet-pytorch', basemodel_name, pretrained=True)
+        # basemodel = torch.hub.load('./checkpoints', basemodel_name, source='local', pretrained=True)
+        # basemodel -- GenEfficientNet(...)
+
+        basemodel = create_model()
         print('Done.')
 
+        
         # Remove last layer
         print('Removing last two layers (global_pool & classifier).')
         basemodel.global_pool = nn.Identity()

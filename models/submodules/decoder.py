@@ -2,11 +2,16 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from models.submodules.submodules import UpSampleBN, UpSampleGN, norm_normalize, sample_points
-
+import pdb
 
 class Decoder(nn.Module):
     def __init__(self, args):
         super(Decoder, self).__init__()
+        # args = Namespace(architecture='GN', 
+        #     pretrained='nyu', sampling_ratio=0.4, 
+        #     importance_ratio=0.7, input_height=480, 
+        #     input_width=640, imgs_dir='./examples')
+
 
         # hyper-parameter for sampling
         self.sampling_ratio = args.sampling_ratio
@@ -55,6 +60,9 @@ class Decoder(nn.Module):
             nn.Conv1d(128, 128, kernel_size=1), nn.ReLU(),
             nn.Conv1d(128, 4, kernel_size=1),
         )
+
+        # ==> pdb.set_trace()
+
 
     def forward(self, features, gt_norm_mask=None, mode='test'):
         x_block0, x_block1, x_block2, x_block3, x_block4 = features[4], features[5], features[6], features[8], features[11]

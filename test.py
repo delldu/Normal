@@ -22,7 +22,6 @@ def test(model, test_loader, device, results_dir):
 
     with torch.no_grad():
         for data_dict in tqdm(test_loader):
-
             img = data_dict['img'].to(device)
             norm_out_list, _, _ = model(img)
             norm_out = norm_out_list[-1]
@@ -96,6 +95,8 @@ if __name__ == '__main__':
     model = NNET(args).to(device)
     model = utils.load_checkpoint(checkpoint, model)
     model.eval()
+
+    torch.save(model.state_dict(), "/tmp/Normal.pth")
     print('loading checkpoint... / done')
 
     # test the model
